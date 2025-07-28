@@ -14,37 +14,47 @@
       margin-top: 20px;
       width: 100%;
     }
-  
+
     .list-card {
       flex: 1 1 300px;
       max-width: 100%;
     }
-  
+
     .collection-item {
-    font-size: 2rem;
+      font-size: 2rem;
       padding: 20px 30px;
       font-weight: 700;
     }
-  
+
     .collection-item strong {
       font-size: 2rem;
       font-weight: 700;
     }
-  
+
     .collection-item span {
       font-size: 1.2rem;
     }
-  
+
     .item-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
+
+    .toggle-btn {
+      margin: 20px 0;
+    }
   </style>
 </head>
 <body class="grey lighten-4">
   <div class="container">
-    <div class="card">
+    <!-- Toggle Button -->
+    <div class="center-align toggle-btn">
+      <button class="btn grey" onclick="toggleCreateList()">Toggle List Creator</button>
+    </div>
+
+    <!-- Create List Card (Hidden by Default) -->
+    <div class="card" id="createListCard" style="display: none;">
       <div class="card-content">
         <span class="card-title">Create a New List</span>
         <div class="input-field">
@@ -54,6 +64,8 @@
         <button class="btn blue" onclick="createList()">Add List</button>
       </div>
     </div>
+
+    <!-- Lists Display -->
     <div id="listsContainer"></div>
   </div>
 
@@ -90,6 +102,7 @@
     const db = getFirestore(app);
     const listsCol = collection(db, "lists");
 
+    // Listen for real-time updates
     onSnapshot(listsCol, (snapshot) => {
       document.getElementById("listsContainer").innerHTML = "";
       snapshot.forEach(docSnap => {
@@ -97,6 +110,7 @@
       });
     });
 
+    // Create list
     window.createList = async function () {
       const titleInput = document.getElementById("listTitle");
       const title = titleInput.value.trim();
@@ -108,6 +122,7 @@
       titleInput.value = "";
     };
 
+    // Add item to a list
     window.addItem = async function (listId) {
       const inputId = `${listId}-itemTitle`;
       const itemInput = document.getElementById(inputId);
@@ -121,12 +136,14 @@
       itemInput.value = "";
     };
 
+    // Delete entire list
     window.deleteList = async function (listId) {
       if (confirm("Are you sure you want to delete this list?")) {
         await deleteDoc(doc(db, "lists", listId));
       }
     };
 
+    // Delete specific item
     window.deleteItem = async function (listId, item) {
       const listRef = doc(db, "lists", listId);
       await updateDoc(listRef, {
@@ -134,7 +151,7 @@
       });
     };
 
-    // Helper to determine color based on how old the timestamp is
+    // Return color class based on time difference
     function getTimeColor(timeStr) {
       const itemDate = new Date(timeStr);
       const now = new Date();
@@ -145,6 +162,7 @@
       return "red-text";
     }
 
+    // Render a single list
     window.renderList = function (id, data) {
       const itemsHTML = (data.items || []).map(item => `
         <li class="collection-item">
@@ -180,6 +198,12 @@
         </div>
       `;
       document.getElementById("listsContainer").insertAdjacentHTML("beforeend", listHTML);
+    };
+
+    // Toggle the visibility of the list creator
+    window.toggleCreateList = function () {
+      const card = document.getElementById("createListCard");
+      card.style.display = card.style.display === "none" ? "block" : "none";
     };
   </script>
 </body>
