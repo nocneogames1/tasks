@@ -14,36 +14,13 @@
       margin-top: 20px;
       width: 100%;
     }
-
-    .list-card {
-      flex: 1 1 300px;
-      max-width: 100%;
-    }
-
-    .collection-item {
-      font-size: 2rem;
-      padding: 20px 30px;
-      font-weight: 700;
-    }
-
-    .collection-item strong {
-      font-size: 2rem;
-      font-weight: 700;
-    }
-
-    .collection-item span {
-      font-size: 1.2rem;
-    }
-
-    .item-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .toggle-btn {
-      margin: 20px 0;
-    }
+    .list-card { flex: 1 1 300px; max-width: 100%; }
+    .collection-item { font-size: 2rem; padding: 20px 30px; font-weight: 700; }
+    .collection-item strong { font-size: 2rem; font-weight: 700; }
+    .collection-item span { font-size: 1.2rem; }
+    .item-row { display: flex; justify-content: space-between; align-items: center; }
+    .item-actions { display: flex; gap: 8px; align-items: center; }
+    .toggle-btn { margin: 20px 0; }
   </style>
 </head>
 <body class="grey lighten-4">
@@ -115,10 +92,7 @@
       const titleInput = document.getElementById("listTitle");
       const title = titleInput.value.trim();
       if (!title) return M.toast({ html: "Please enter a list title" });
-      await addDoc(listsCol, {
-        title: title,
-        items: []
-      });
+      await addDoc(listsCol, { title, items: [] });
       titleInput.value = "";
     };
 
@@ -146,9 +120,22 @@
     // Delete specific item
     window.deleteItem = async function (listId, item) {
       const listRef = doc(db, "lists", listId);
-      await updateDoc(listRef, {
-        items: arrayRemove(item)
-      });
+      await updateDoc(listRef, { items: arrayRemove(item) });
+    };
+
+    // ✏️ Edit specific item (title only, keeps original time)
+    window.editItem = async function (listId, item) {
+      const newTitleRaw = prompt("Edit item title:", item.title);
+      if (newTitleRaw === null) return; // user cancelled
+      const newTitle = newTitleRaw.trim();
+      if (!newTitle) return M.toast({ html: "Title cannot be empty" });
+      if (newTitle === item.title) return; // nothing changed
+
+      const listRef = doc(db, "lists", listId);
+      // Remove the old object, then add the updated one (Firestore arrayReplace workaround)
+      await updateDoc(listRef, { items: arrayRemove(item) });
+      await updateDoc(listRef, { items: arrayUnion({ title: newTitle, time: item.time }) });
+      M.toast({ html: "Item updated" });
     };
 
     // Return color class based on time difference
@@ -171,9 +158,14 @@
               <strong>${item.title}</strong><br>
               <span class="${getTimeColor(item.time)}">${item.time}</span>
             </div>
-            <a href="#!" onclick='deleteItem("${id}", ${JSON.stringify(item)})'>
-              <i class="material-icons red-text">delete</i>
-            </a>
+            <div class="item-actions">
+              <a href="#!" onclick='editItem("${id}", ${JSON.stringify(item)})' title="Edit">
+                <i class="material-icons">edit</i>
+              </a>
+              <a href="#!" onclick='deleteItem("${id}", ${JSON.stringify(item)})' title="Delete">
+                <i class="material-icons red-text">delete</i>
+              </a>
+            </div>
           </div>
         </li>`).join("");
 
@@ -183,7 +175,7 @@
             <div class="card-content">
               <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
                 ${data.title}
-                <a href="#!" class="red-text" onclick="deleteList('${id}')">
+                <a href="#!" class="red-text" onclick="deleteList('${id}')" title="Delete List">
                   <i class="material-icons">delete</i>
                 </a>
               </div>
