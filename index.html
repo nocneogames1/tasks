@@ -7,26 +7,61 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
   <style>
-    #listsContainer {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      margin-top: 20px;
-      width: 100%;
-    }
-    .list-card { flex: 1 1 300px; max-width: 100%; }
-    .collection-item { font-size: 2rem; padding: 20px 30px; font-weight: 700; }
-    .collection-item strong { font-size: 2rem; font-weight: 700; }
-    .collection-item span { font-size: 1.2rem; }
-    .item-row { display: flex; justify-content: space-between; align-items: center; }
-    .item-actions { display: flex; gap: 8px; align-items: center; }
-    .toggle-btn { margin: 20px 0; }
-    select.status-select { /*font-size: 0.9rem; height: 2rem; padding: 0 5px; width: 100px; */width: 1.5rem;       /* small width so only arrow shows */
-  font-size: 0;        /* hides text */
-  height: 1.6rem;
-  padding: 0; }
-  .status-select option {
-  font-size: 0.8rem;   /* show text in dropdown list - Ran's edition to */
+    html, body {
+  height: 100%;
+  margin: 0;           /* remove default body margin */
+}
+
+.container {           /* override Materialize's fixed width container */
+  max-width: 90%;
+  width: 100%;
+  padding: 0;
+  margin-top: 10px;
+}
+
+#listsContainer {
+  display: flex;
+  flex-wrap: nowrap;   /* keep in one row */
+  gap: 16px;           /* space between cards */
+  margin-top: 20px;
+  min-height: 50vh;
+  overflow-x: auto;    /* allow scrolling if many cards */
+}
+
+.list-card {
+  flex: 1 1 auto;
+  height: auto;
+}
+
+
+.list-card .card {
+  height: 100%;
+  margin: 0;
+  border-radius: 0;    /* optional: edge-to-edge look */
+  box-shadow: none;    /* optional: remove shadow for full-bleed feel */
+}
+.item-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 2px;
+  flex-wrap: nowrap;
+}
+.item-actions .chip {
+  white-space: nowrap; /* prevent chip text from wrapping */
+}
+.status-select {
+  font-size: 0;          /* hide the displayed text */
+  width: 20px;           /* make it just wide enough for the arrow */
+  height: 20px;
+  padding: 0;
+  border: none;          /* optional: remove border */
+  background-color: transparent; /* optional: transparent background */
+  -webkit-appearance: menulist;  /* keep native arrow */
+}
+
+.status-select option {
+  font-size: 0.85rem;    /* still show text in dropdown list */
 }
 
     /* Status chip color helpers */
@@ -53,7 +88,7 @@
       </div>
     </div>
 
-    <div id="listsContainer"></div>
+    <div id="listsContainer"srt></div>
   </div>
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -170,10 +205,10 @@
 
     window.renderList = function (id, data) {
       const itemsHTML = (data.items || []).map(item => `
-        <li class="collection-item" style="height: auto; line-height: 2rem;">
+        <li class="collection-item" >
           <div class="item-column">
             <div>
-              <strong>${item.title}</strong><br>
+              <strong style="font-size:30px">${item.title}</strong><br>
               <span class="${getTimeColor(item.time)}">${item.time}</span>
             </div>
             <div class="item-actions">
@@ -198,7 +233,7 @@
         <div class="list-card" id="${id}">
           <div class="card">
             <div class="card-content">
-              <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+              <div class="card-title" style="display: flex; justify-content: center; align-items: flex-start;">
                 ${data.title}
                 <a href="#!" class="red-text" onclick="deleteList('${id}')" title="Delete List">
                   <i class="material-icons">delete</i>
