@@ -21,16 +21,21 @@
     .item-row { display: flex; justify-content: space-between; align-items: center; }
     .item-actions { display: flex; gap: 8px; align-items: center; }
     .toggle-btn { margin: 20px 0; }
+    select.status-select { font-size: 0.9rem; height: 2rem; padding: 0 5px; }
+
+    /* Status chip color helpers */
+    .chip.status-pending { background-color: #9e9e9e; color: #fff; }
+    .chip.status-inprogress { background-color: #2196f3; color: #fff; }
+    .chip.status-done { background-color: #43a047; color: #fff; }
+    .chip.status-blocked { background-color: #e53935; color: #fff; }
   </style>
 </head>
 <body class="grey lighten-4">
   <div class="container">
-    <!-- Toggle Button -->
     <div class="center-align toggle-btn">
       <button class="btn grey" onclick="toggleCreateList()">Toggle List Creator</button>
     </div>
 
-    <!-- Create List Card (Hidden by Default) -->
     <div class="card" id="createListCard" style="display: none;">
       <div class="card-content">
         <span class="card-title">Create a New List</span>
@@ -42,15 +47,12 @@
       </div>
     </div>
 
-    <!-- Lists Display -->
     <div id="listsContainer"></div>
   </div>
 
-  <!-- Materialize JS and jQuery -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 
-  <!-- Firebase Integration -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
     import {
@@ -79,7 +81,6 @@
     const db = getFirestore(app);
     const listsCol = collection(db, "lists");
 
-    // Listen for real-time updates
     onSnapshot(listsCol, (snapshot) => {
       document.getElementById("listsContainer").innerHTML = "";
       snapshot.forEach(docSnap => {
@@ -87,7 +88,6 @@
       });
     });
 
-    // Create list
     window.createList = async function () {
       const titleInput = document.getElementById("listTitle");
       const title = titleInput.value.trim();
@@ -96,49 +96,54 @@
       titleInput.value = "";
     };
 
-    // Add item to a list
     window.addItem = async function (listId) {
       const inputId = `${listId}-itemTitle`;
       const itemInput = document.getElementById(inputId);
       const itemTitle = itemInput.value.trim();
       if (!itemTitle) return M.toast({ html: "Please enter an item title" });
+
       const time = new Date().toLocaleString();
+      const status = "Pending";
+
       const listRef = doc(db, "lists", listId);
       await updateDoc(listRef, {
-        items: arrayUnion({ title: itemTitle, time })
+        items: arrayUnion({ title: itemTitle, time, status })
       });
       itemInput.value = "";
     };
 
-    // Delete entire list
     window.deleteList = async function (listId) {
       if (confirm("Are you sure you want to delete this list?")) {
         await deleteDoc(doc(db, "lists", listId));
       }
     };
 
-    // Delete specific item
     window.deleteItem = async function (listId, item) {
       const listRef = doc(db, "lists", listId);
       await updateDoc(listRef, { items: arrayRemove(item) });
     };
 
-    // ✏️ Edit specific item (title only, keeps original time)
     window.editItem = async function (listId, item) {
       const newTitleRaw = prompt("Edit item title:", item.title);
-      if (newTitleRaw === null) return; // user cancelled
+      if (newTitleRaw === null) return;
       const newTitle = newTitleRaw.trim();
       if (!newTitle) return M.toast({ html: "Title cannot be empty" });
-      if (newTitle === item.title) return; // nothing changed
+      if (newTitle === item.title) return;
 
       const listRef = doc(db, "lists", listId);
-      // Remove the old object, then add the updated one (Firestore arrayReplace workaround)
       await updateDoc(listRef, { items: arrayRemove(item) });
-      await updateDoc(listRef, { items: arrayUnion({ title: newTitle, time: item.time }) });
+      await updateDoc(listRef, { items: arrayUnion({ title: newTitle, time: item.time, status: item.status || "Pending" }) });
       M.toast({ html: "Item updated" });
     };
 
-    // Return color class based on time difference
+    // Change status function
+    window.changeStatus = async function (listId, item, newStatus) {
+      const listRef = doc(db, "lists", listId);
+      await updateDoc(listRef, { items: arrayRemove(item) });
+      await updateDoc(listRef, { items: arrayUnion({ title: item.title, time: item.time, status: newStatus }) });
+      M.toast({ html: "Status updated" });
+    };
+
     function getTimeColor(timeStr) {
       const itemDate = new Date(timeStr);
       const now = new Date();
@@ -149,16 +154,30 @@
       return "red-text";
     }
 
-    // Render a single list
+    function getStatusChipClass(status) {
+      const s = (status || "Pending").toLowerCase();
+      if (s === "done") return "status-done";
+      if (s.includes("progress")) return "status-inprogress";
+      if (s === "blocked") return "status-blocked";
+      return "status-pending";
+    }
+
     window.renderList = function (id, data) {
       const itemsHTML = (data.items || []).map(item => `
-       <li class="collection-item" style="height: auto; line-height: 2rem;">
+        <li class="collection-item" style="height: auto; line-height: 2rem;">
           <div class="item-row">
             <div>
               <strong>${item.title}</strong><br>
               <span class="${getTimeColor(item.time)}">${item.time}</span>
             </div>
             <div class="item-actions">
+              <span class="chip ${getStatusChipClass(item.status)}">${item.status || 'Pending'}</span>
+              <select class="status-select browser-default" onchange='changeStatus("${id}", ${JSON.stringify(item)}, this.value)'>
+                <option value="Pending" ${item.status === "Pending" ? "selected" : ""}>Pending</option>
+                <option value="In Progress" ${item.status === "In Progress" ? "selected" : ""}>In Progress</option>
+                <option value="Done" ${item.status === "Done" ? "selected" : ""}>Done</option>
+                <option value="Blocked" ${item.status === "Blocked" ? "selected" : ""}>Blocked</option>
+              </select>
               <a href="#!" onclick='editItem("${id}", ${JSON.stringify(item)})' title="Edit">
                 <i class="material-icons">edit</i>
               </a>
@@ -192,7 +211,6 @@
       document.getElementById("listsContainer").insertAdjacentHTML("beforeend", listHTML);
     };
 
-    // Toggle the visibility of the list creator
     window.toggleCreateList = function () {
       const card = document.getElementById("createListCard");
       card.style.display = card.style.display === "none" ? "block" : "none";
