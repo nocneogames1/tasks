@@ -9,10 +9,15 @@
   <style>
     #listsContainer {
       display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      margin-top: 20px;
-      width: 100%;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 16px;
+  margin-top: 20px;
+  width: 100vw;       /* full viewport width */
+  min-height: 100vh;  /* optional: full viewport height */
+  margin-left: 0;
+  margin-right: 0;
     }
     .list-card { flex: 1 1 300px; max-width: 100%; }
     .collection-item { font-size: 2rem; padding: 20px 30px; font-weight: 700; }
@@ -37,7 +42,7 @@
     .chip.status-blocked { background-color: #e53935; color: #fff; }
   </style>
 </head>
-<body class="grey lighten-4">
+<body class="grey lighten-4" style="width: 100%;">
   <div class="container">
     <div class="center-align toggle-btn">
       <button class="btn grey" onclick="toggleCreateList()">Toggle List Creator</button>
