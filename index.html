@@ -7,32 +7,38 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
   <style>
-    #listsContainer {
-      display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 16px;
+    html, body {
+  height: 100%;
+  margin: 0;           /* remove default body margin */
+}
+
+.container {           /* override Materialize's fixed width container */
+  max-width: 90%;
+  width: 100%;
+  padding: 0;
+  margin-top: 10px;
+}
+
+#listsContainer {
+  display: flex;
+  flex-wrap: nowrap;   /* keep in one row */
+  gap: 16px;           /* space between cards */
   margin-top: 20px;
-  width: 100vw;       /* full viewport width */
-  min-height: 100vh;  /* optional: full viewport height */
-  margin-left: 0;
-  margin-right: 0;
-    }
-    .list-card { flex: 1 1 300px; max-width: 100%; }
-    .collection-item { font-size: 2rem; padding: 20px 30px; font-weight: 700; }
-    .collection-item strong { font-size: 2rem; font-weight: 700; }
-    .collection-item span { font-size: 1.2rem; }
-    .item-row { display: flex; justify-content: space-between; align-items: center; }
-    .item-actions { display: flex; gap: 8px; align-items: center; }
-    .toggle-btn { margin: 20px 0; }
-    select.status-select {
-      width: 1.5rem;       /* small width so only arrow shows */
-      font-size: 0;        /* hides text */
-      height: 1.6rem;
-      padding: 0; }
-  .status-select option {
-  font-size: 0.8rem;   /* show text in dropdown list - Ran's edition to avoid double status showing. */
+  min-height: 50vh;
+  overflow-x: auto;    /* allow scrolling if many cards */
+}
+
+.list-card {
+  flex: 1 1 auto;
+  height: auto;
+}
+
+
+.list-card .card {
+  height: 100%;
+  margin: 0;
+  border-radius: 0;    /* optional: edge-to-edge look */
+  box-shadow: none;    /* optional: remove shadow for full-bleed feel */
 }
 
     /* Status chip color helpers */
@@ -42,7 +48,7 @@
     .chip.status-blocked { background-color: #e53935; color: #fff; }
   </style>
 </head>
-<body class="grey lighten-4" style="width: 100%;">
+<body class="grey lighten-4">
   <div class="container">
     <div class="center-align toggle-btn">
       <button class="btn grey" onclick="toggleCreateList()">Toggle List Creator</button>
@@ -59,7 +65,7 @@
       </div>
     </div>
 
-    <div id="listsContainer"></div>
+    <div id="listsContainer"srt></div>
   </div>
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -179,7 +185,7 @@
         <li class="collection-item" style="height: auto; line-height: 2rem;">
           <div class="item-column">
             <div>
-              <strong>${item.title}</strong><br>
+              <strong style="font-size:30px">${item.title}</strong><br>
               <span class="${getTimeColor(item.time)}">${item.time}</span>
             </div>
             <div class="item-actions">
@@ -204,7 +210,7 @@
         <div class="list-card" id="${id}">
           <div class="card">
             <div class="card-content">
-              <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+              <div class="card-title" style="display: flex; justify-content: center; align-items: flex-start;">
                 ${data.title}
                 <a href="#!" class="red-text" onclick="deleteList('${id}')" title="Delete List">
                   <i class="material-icons">delete</i>
