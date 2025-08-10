@@ -152,7 +152,7 @@
     // Render a single list
     window.renderList = function (id, data) {
       const itemsHTML = (data.items || []).map(item => `
-        <li class="collection-item">
+       <li class="collection-item" style="height: auto; line-height: 2rem;">
           <div class="item-row">
             <div>
               <strong>${item.title}</strong><br>
