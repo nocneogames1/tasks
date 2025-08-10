@@ -7,38 +7,26 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
   <style>
-    html, body {
-  height: 100%;
-  margin: 0;           /* remove default body margin */
-}
-
-.container {           /* override Materialize's fixed width container */
-  max-width: 90%;
-  width: 100%;
-  padding: 0;
-  margin-top: 10px;
-}
-
-#listsContainer {
-  display: flex;
-  flex-wrap: nowrap;   /* keep in one row */
-  gap: 16px;           /* space between cards */
-  margin-top: 20px;
-  min-height: 50vh;
-  overflow-x: auto;    /* allow scrolling if many cards */
-}
-
-.list-card {
-  flex: 1 1 auto;
-  height: auto;
-}
-
-
-.list-card .card {
-  height: 100%;
-  margin: 0;
-  border-radius: 0;    /* optional: edge-to-edge look */
-  box-shadow: none;    /* optional: remove shadow for full-bleed feel */
+    #listsContainer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 20px;
+      width: 100%;
+    }
+    .list-card { flex: 1 1 300px; max-width: 100%; }
+    .collection-item { font-size: 2rem; padding: 20px 30px; font-weight: 700; }
+    .collection-item strong { font-size: 2rem; font-weight: 700; }
+    .collection-item span { font-size: 1.2rem; }
+    .item-row { display: flex; justify-content: space-between; align-items: center; }
+    .item-actions { display: flex; gap: 8px; align-items: center; }
+    .toggle-btn { margin: 20px 0; }
+    select.status-select { /*font-size: 0.9rem; height: 2rem; padding: 0 5px; width: 100px; */width: 1.5rem;       /* small width so only arrow shows */
+  font-size: 0;        /* hides text */
+  height: 1.6rem;
+  padding: 0; }
+  .status-select option {
+  font-size: 0.8rem;   /* show text in dropdown list - Ran's edition to */
 }
 
     /* Status chip color helpers */
@@ -65,7 +53,7 @@
       </div>
     </div>
 
-    <div id="listsContainer"srt></div>
+    <div id="listsContainer"></div>
   </div>
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -185,7 +173,7 @@
         <li class="collection-item" style="height: auto; line-height: 2rem;">
           <div class="item-column">
             <div>
-              <strong style="font-size:30px">${item.title}</strong><br>
+              <strong>${item.title}</strong><br>
               <span class="${getTimeColor(item.time)}">${item.time}</span>
             </div>
             <div class="item-actions">
@@ -210,7 +198,7 @@
         <div class="list-card" id="${id}">
           <div class="card">
             <div class="card-content">
-              <div class="card-title" style="display: flex; justify-content: center; align-items: flex-start;">
+              <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
                 ${data.title}
                 <a href="#!" class="red-text" onclick="deleteList('${id}')" title="Delete List">
                   <i class="material-icons">delete</i>
